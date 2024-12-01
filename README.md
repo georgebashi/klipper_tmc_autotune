@@ -1,3 +1,8 @@
+This is a modified Klipper TMC Autotune version I use for my T100 and T250 printers.
+
+### It contains the following additions:
+- 
+
 # Klipper TMC Autotune
 
 Klipper extension for automatic configuration and tuning of TMC drivers.
@@ -20,7 +25,7 @@ In particular, it enables StealthChop by default on Z motors and extruders, Cool
 To install this plugin, run the installation script using the following command over SSH. This script will download this GitHub repository to your RaspberryPi home directory, and symlink the files in the Klipper extra folder.
 
 ```bash
-wget -O - https://raw.githubusercontent.com/andrewmcgr/klipper_tmc_autotune/main/install.sh | bash
+wget -O - https://raw.githubusercontent.com/MSzturc/klipper_tmc_autotune/main/install.sh | bash
 ```
 
 Then, add the following to your `moonraker.conf` to enable automatic updates:
@@ -29,7 +34,7 @@ Then, add the following to your `moonraker.conf` to enable automatic updates:
 type: git_repo
 channel: dev
 path: ~/klipper_tmc_autotune
-origin: https://github.com/andrewmcgr/klipper_tmc_autotune.git
+origin: https://github.com/MSzturc/klipper_tmc_autotune.git
 managed_services: klipper
 primary_branch: main
 install_script: install.sh
