@@ -1,7 +1,8 @@
 This is a modified Klipper TMC Autotune version I use for my T100 and T250 printers.
 
 ### It contains the following additions:
-- 
+- bugfix: use IPeak rather than IRMS for hysteresis calculation 
+- feat: Use cs for hysteresis calculation
 
 # Klipper TMC Autotune
 

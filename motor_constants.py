@@ -29,19 +29,26 @@ class MotorConstants:
         if steps==0:
             steps=self.S
         return (255 - self.pwmofs(volts, current)) / ( math.pi * self.pwmgrad(fclk, steps))
-    def hysteresis(self, extra=0, fclk=12.5e6, volts=24.0, current=0.0, tbl=1, toff=0):
-        I = current if current > 0.0 else self.I
-        logging.info("autotune_tmc seting hysteresis based on %s V", volts)
+    def hysteresis(self, extra=0, fclk=12.5e6, volts=24.0, current=0.0, tbl=1, toff=0, rsense=0.075,scale=0):
+        if current > 0.0:
+            I = current * math.sqrt(2)
+        else:
+            I = self.I
+        logging.info("autotune_tmc seting hysteresis based on %s V at %.2f A", volts,I)
         tblank = 16.0 * (1.5 ** tbl) / fclk
         tsd = (12.0 + 32.0 * toff) / fclk
         dcoilblank = volts * tblank / self.L
         dcoilsd = self.R * I * 2.0 * tsd / self.L
         logging.info("dcoilblank = %f, dcoilsd = %f", dcoilblank, dcoilsd)
-        hysteresis = extra + int(math.ceil(max(0.5 + ((dcoilblank + dcoilsd) * 2 * 248 * 32 / I) / 32 - 8, -2)))
-        htotal = min(hysteresis, 14)
-        hstrt = max(min(htotal, 8), 1)
-        hend = min(htotal - hstrt, 12)
-        logging.info("hysteresis = %d, htotal = %d, hstrt = %d, hend = %d", hysteresis, htotal, hstrt, hend)
+        if scale > 0:
+            cs = scale
+        else:
+            cs = max(0, min(31, int(math.ceil(rsense * 32 * I / 0.32) - 1)))
+        logging.info("current scale = %d", cs)
+        hysteresis = extra + int(max(0.5 + ((dcoilblank + dcoilsd) * 2 * 248 * (cs + 1) / I ) / 32 - 8, -2))
+        hstrt = max(min(hysteresis, 8), 1)
+        hend = min(hysteresis - hstrt, 12)
+        logging.info("hysteresis = %d, hstrt = %d, hend = %d, extra = %d", hysteresis, hstrt, hend, extra)
         return hstrt - 1, hend + 3
 
 
