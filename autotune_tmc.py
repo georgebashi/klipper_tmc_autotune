@@ -288,7 +288,7 @@ class AutotuneTMC:
         self._set_driver_field('pwm_freq', pwm_freq)
 
     def _set_hysteresis(self, run_current):
-        hstrt, hend = self.motor_object.hysteresis(
+        hstrt, hend = self.motor_object.hysteresis(name="autotune",
             volts=self.voltage,
             current=run_current,
             tbl=self.tbl,
