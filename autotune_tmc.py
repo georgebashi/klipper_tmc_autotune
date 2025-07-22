@@ -373,7 +373,7 @@ class AutotuneTMC:
             # blank time of 16 cycles will not work in this case
             self.tbl = 1
 
-        pfdcycles = ncycles - (24 + 32 * self.toff) * 2 - [16, 34, 36, 54][self.tbl]
+        pfdcycles = ncycles - (24 + 32 * self.toff) * 2 - [16, 24, 36, 54][self.tbl]
         if self.tpfd is None:
             self.tpfd = max(0, min(15, int(math.ceil(pfdcycles / 128))))
 
