@@ -28,7 +28,7 @@ class MotorConstants:
     def maxpwmrps(self, fclk=12.5e6, steps=0, volts=24.0, current=0.0):
         if steps==0:
             steps=self.S
-        return (255 - self.pwmofs(volts, current)) / ( math.pi * self.pwmgrad(fclk, steps))
+        return ((255 - self.pwmofs(volts, current)) * fclk) / (self.pwmgrad(fclk, steps, volts) * steps * 65536.0)
     def hysteresis(self, extra=0, fclk=12.5e6, volts=24.0, current=0.0, tbl=1, toff=0, cs=31):
         I_peak = current * math.sqrt(2) if current > 0.0 else self.I
 
