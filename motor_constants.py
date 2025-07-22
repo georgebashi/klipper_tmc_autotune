@@ -29,23 +29,29 @@ class MotorConstants:
         if steps==0:
             steps=self.S
         return ((255 - self.pwmofs(volts, current)) * fclk) / (self.pwmgrad(fclk, steps, volts) * steps * 65536.0)
-    def hysteresis(self, extra=0, fclk=12.5e6, volts=24.0, current=0.0, tbl=1, toff=0, cs=31):
+    def hysteresis(self, extra=0, fclk=12.5e6, volts=24.0, current=0.0, tbl=1, toff=0, cs=31, hstrt=None, hend=None):
         I_peak = current * math.sqrt(2) if current > 0.0 else self.I
-
+ 
         logging.info(f"autotune_tmc setting hysteresis based on %s V, I_peak=%.2f A, CS=%s", volts, I_peak, cs)
         tblank = 16.0 * (1.5 ** tbl) / fclk
         tsd = (12.0 + 32.0 * toff) / fclk
-
+ 
         dcoilblank = volts * tblank / self.L
         dcoilsd = self.R * I_peak * 2.0 * tsd / self.L
         logging.info("dcoilblank = %f, dcoilsd = %f", dcoilblank, dcoilsd)
-
+ 
         hysteresis = extra + int(math.ceil(max(0.5 + (((dcoilblank + dcoilsd) * 2 * 248 * (cs + 1)) / I_peak) / 32 - 8, -2)))
         htotal = min(hysteresis, 14)
-        hstrt = max(min(htotal, 8), 1)
-        hend = min(htotal - hstrt, 12)
+        if hstrt is None and hend is None:
+            hstrt = max(min(htotal, 8), 1)
+            hend = min(htotal - hstrt, 12)
+        elif hstrt is not None and hend is None:
+            hend = min(htotal - hstrt, 12)
+        elif hstrt is None and hend is not None:
+            hstrt = min(htotal - hend, 8)
+
         logging.info("hysteresis = %d, htotal = %d, hstrt = %d, hend = %d", hysteresis, htotal, hstrt, hend)
-        return hstrt - 1, hend + 3
+        return hstrt, hend
 
 
 def load_config_prefix(config):

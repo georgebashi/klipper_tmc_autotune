@@ -125,6 +125,8 @@ class AutotuneTMC:
                                               minval=0, maxval=8)
         self.tbl = config.getint('tbl', default=TBL, minval=0, maxval=3)
         self.toff = config.getint('toff', default=None, minval=1, maxval=15)
+        self.hstrt = config.getint('hstrt', default=None, minval=0, maxval=7)
+        self.hend = config.getint('hend', default=None, minval=0, maxval=15)
         self.tpfd = config.getint('tpfd', default=None, minval=0, maxval=15)
         self.sgt = config.getint('sgt', default=SGT, minval=-64, maxval=63)
         self.sg4_thrs = config.getint('sg4_thrs', default=SG4_THRS, minval=0, maxval=255)
@@ -202,6 +204,14 @@ class AutotuneTMC:
         if toff is not None:
             if toff >= 1 or toff <= 15:
                 self.toff = toff
+        hstrt = gcmd.get_int('HSTRT', None)
+        if hstrt is not None:
+            if hstrt >= 0 or hstrt <= 7:
+                self.hstrt = hstrt
+        hend = gcmd.get_int('HEND', None)
+        if hend is not None:
+            if hend >= 0 or hend <= 15:
+                self.hend = hend
         tpfd = gcmd.get_int('TPFD', None)
         if tpfd is not None:
             if tpfd >= 0 or tpfd <= 15:
@@ -297,7 +307,9 @@ class AutotuneTMC:
                          if self.fclk*i[1] < self.pwm_freq_target))[0]
         self._set_driver_field('pwm_freq', pwm_freq)
 
-    def _set_hysteresis(self, run_current):
+def _set_hysteresis(self, run_current):
+        logical_hstrt = self.hstrt + 1 if self.hstrt is not None else None
+        logical_hend = self.hend - 3 if self.hend is not None else None
         hstrt, hend = self.motor_object.hysteresis(
             volts=self.voltage,
             current=run_current,
@@ -305,10 +317,12 @@ class AutotuneTMC:
             toff=self.toff,
             fclk=self.fclk,
             extra=self.extra_hysteresis,
-            cs=self.cs
+            cs=self.cs,
+            hstrt=logical_hstrt,
+            hend=logical_hend
             )
-        self._set_driver_field('hstrt', hstrt)
-        self._set_driver_field('hend', hend)
+        self._set_driver_field('hstrt', hstrt - 1)
+        self._set_driver_field('hend', hend + 3)
 
     def _set_sg4thrs(self):
         if self.tmc_object.fields.lookup_register("sg4_thrs", None) is not None:
