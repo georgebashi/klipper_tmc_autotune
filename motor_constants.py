@@ -30,15 +30,15 @@ class MotorConstants:
         if cs_actual is not None:
             ofs *= (cs_actual + 1) / 32.0
         return ((255.0 - ofs) * volts) / (1.46 * 2.0 * math.pi * 256.0 * self.cbemf)
-    def hysteresis(self, extra=0, fclk=12.5e6, volts=24.0, current=0.0, tblank=1.92e-6, toff=0):
-        I = current if current > 0.0 else self.I
-        logging.info("autotune_tmc seting hysteresis based on %s V", volts)
+    def hysteresis(self, extra=0, fclk=12.5e6, volts=24.0, tblank=1.92e-6, toff=0, cs_actual=31):
+        I = self.I * (cs_actual + 1) / 32.0 * math.sqrt(2.0)
+        logging.info("autotune_tmc setting hysteresis based on %s V at %.2f peak A", volts, I)
         tsd = (12.0 + 32.0 * toff) / fclk
         dcoilblank = volts * tblank / self.L
         dcoilsd = self.R * I * 2.0 * tsd / self.L
         logging.info("dcoilblank = %f, dcoilsd = %f", dcoilblank, dcoilsd)
         hysteresis = extra + int(math.ceil(max(0.5 + ((dcoilblank + dcoilsd) * 2 * 248 * 32 / I) / 32 - 8, -2)))
-        htotal = min(hysteresis, 14)
+        htotal = min(hysteresis, 16)
         hstrt = max(min(htotal, 8), 1)
         hend = min(htotal - hstrt, 12)
         logging.info("hysteresis = %d, htotal = %d, hstrt = %d, hend = %d", hysteresis, htotal, hstrt, hend)

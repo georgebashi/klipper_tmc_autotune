@@ -311,11 +311,11 @@ class AutotuneTMC:
     def _set_hysteresis(self, run_current):
         hstrt, hend = self.motor_object.hysteresis(
             volts=self.voltage,
-            current=run_current,
             tblank=self._tblank_cycles(self.tbl) / self.fclk,
             toff=self.toff,
             fclk=self.fclk,
-            extra=self.extra_hysteresis)
+            extra=self.extra_hysteresis,
+            cs_actual=self.irun)
         self._set_driver_field('hstrt', hstrt)
         self._set_driver_field('hend', hend)
 
