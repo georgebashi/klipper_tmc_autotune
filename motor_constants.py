@@ -25,10 +25,11 @@ class MotorConstants:
         I = current if current > 0.0 else self.I
         return int(math.ceil(374 * self.R * I / volts))
     # Maximum revolutions per second before PWM maxes out.
-    def maxpwmrps(self, fclk=12.5e6, steps=0, volts=24.0, current=0.0):
-        if steps==0:
-            steps=self.S
-        return (255 - self.pwmofs(volts, current)) / ( math.pi * self.pwmgrad(fclk, steps))
+    def maxpwmrps(self, volts=24.0, current=0.0, cs_actual=None):
+        ofs = float(self.pwmofs(volts, current))
+        if cs_actual is not None:
+            ofs *= (cs_actual + 1) / 32.0
+        return ((255.0 - ofs) * volts) / (1.46 * 2.0 * math.pi * 256.0 * self.cbemf)
     def hysteresis(self, extra=0, fclk=12.5e6, volts=24.0, current=0.0, tblank=1.92e-6, toff=0):
         I = current if current > 0.0 else self.I
         logging.info("autotune_tmc seting hysteresis based on %s V", volts)
